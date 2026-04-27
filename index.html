@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FutRadar Ultra</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+
+        :root {
+            --verde-campo: #0b3d1b;
+            --verde-neon: #00ff66;
+            --dourado: #ffd700;
+            --dourado-escuro: #b8860b;
+            --vermelho-alerta: #ff003c;
+            --bg-escuro: #0a0a0a;
+            --vidro: rgba(255, 255, 255, 0.08);
+            --borda-vidro: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: radial-gradient(circle at top, #1a2a20, var(--bg-escuro));
+            color: white;
+            margin: 0; padding: 0; overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 500px; margin: 0 auto; min-height: 100vh;
+            position: relative; padding-bottom: 80px;
+            box-shadow: 0 0 50px rgba(0,255,102,0.1);
+        }
+
+        /* CABEÇALHO ANIMADO */
+        .header {
+            background: linear-gradient(135deg, var(--verde-campo), #145a2b);
+            padding: 25px 20px; text-align: center; font-size: 26px; font-weight: 900;
+            border-bottom: 2px solid var(--verde-neon);
+            box-shadow: 0 10px 30px rgba(0, 255, 102, 0.3);
+            text-transform: uppercase; letter-spacing: 2px;
+            position: relative; overflow: hidden;
+        }
+
+        .header::before {
+            content: ''; position: absolute; top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 20px);
+            animation: moveGrid 20s linear infinite;
+        }
+        @keyframes moveGrid { 100% { transform: translate(20px, 20px); } }
+
+        .bola-spin { display: inline-block; animation: spin 4s linear infinite; margin-right: 10px; text-shadow: 0 0 10px var(--verde-neon); }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* SEÇÕES E ANIMAÇÕES */
+        .section { display: none; padding: 20px; animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .section.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+        .section-title { font-size: 20px; font-weight: 900; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; text-shadow: 0 2px 10px rgba(255,255,255,0.3); }
+
+        /* CARDS GLASSMORPHISM */
+        .card {
+            background: var(--vidro);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--borda-vidro); border-radius: 20px;
+            padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        /* JOGOS AO VIVO COM GLOW */
+        .card-live { border-color: var(--verde-neon); box-shadow: 0 0 20px rgba(0,255,102,0.2); animation: pulsoVerde 2s infinite; }
+        @keyframes pulsoVerde { 0% { box-shadow: 0 0 15px rgba(0,255,102,0.2); } 50% { box-shadow: 0 0 30px rgba(0,255,102,0.6); } 100% { box-shadow: 0 0 15px rgba(0,255,102,0.2); } }
+        
+        .status-live { background: var(--vermelho-alerta); display: inline-block; padding: 5px 12px; border-radius: 20px; font-weight: 900; font-size: 12px; margin-bottom: 15px; animation: piscar 1s infinite; text-shadow: 0 0 5px #fff; }
+        @keyframes piscar { 50% { opacity: 0.5; } }
+
+        .match-row { display: flex; justify-content: space-between; align-items: center; font-weight: 900; }
+        .team { flex: 1; text-align: center; font-size: 18px; text-transform: uppercase; }
+        .score { font-size: 32px; background: rgba(0,0,0,0.5); padding: 5px 20px; border-radius: 15px; border: 1px solid var(--verde-neon); color: var(--verde-neon); text-shadow: 0 0 10px var(--verde-neon); }
+
+        /* LEI DO EX - SIRENE VERMELHA */
+        .card-ex { background: linear-gradient(45deg, #3a0000, #1a0000); border: 2px solid var(--vermelho-alerta); animation: sirene 1.5s infinite; overflow: hidden; position: relative; }
+        @keyframes sirene { 0%, 100% { box-shadow: 0 0 20px rgba(255,0,60,0.3); } 50% { box-shadow: 0 0 50px rgba(255,0,60,0.8); } }
+        .ex-title { color: var(--vermelho-alerta); font-size: 22px; font-weight: 900; text-shadow: 0 0 10px var(--vermelho-alerta); margin-bottom: 10px; }
+
+        /* COPAS - OURO E CONFETES */
+        .section-copa { background: radial-gradient(ellipse at top, #3b2a00, #000); position: relative; }
+        .card-copa { background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(0,0,0,0.8)); border: 2px solid var(--dourado); box-shadow: 0 0 30px rgba(255,215,0,0.3); }
+        .copa-title { color: var(--dourado); font-size: 28px; text-align: center; text-shadow: 0 0 20px var(--dourado); margin-top: 0; }
+        .score-copa { color: var(--dourado); border-color: var(--dourado); text-shadow: 0 0 10px var(--dourado); }
+
+        .confetti { position: absolute; width: 10px; height: 20px; background-color: #f00; animation: fall linear forwards; z-index: 10; opacity: 0.8; }
+        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+
+        /* MENU INFERIOR NEON */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; max-width: 500px;
+            background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(20px);
+            display: flex; justify-content: space-around; padding: 15px 0;
+            border-top: 1px solid var(--borda-vidro);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.8); z-index: 100;
+        }
+
+        .nav-item {
+            color: #555; display: flex; flex-direction: column; align-items: center;
+            font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.4s ease;
+        }
+
+        .nav-item.active { color: var(--verde-neon); transform: translateY(-8px) scale(1.1); text-shadow: 0 0 10px var(--verde-neon); }
+        .nav-icon { font-size: 24px; margin-bottom: 5px; transition: transform 0.4s; }
+        .nav-item.active .nav-icon { transform: rotate(-10deg); }
+    </style>
+</head>
+<body>
+
+<audio id="sound-click" src="https://actions.google.com/sounds/v1/ui/button_click.ogg"></audio>
+<audio id="sound-whistle" src="https://actions.google.com/sounds/v1/sports/referee_whistle.ogg"></audio>
+<audio id="sound-crowd" src="https://actions.google.com/sounds/v1/crowds/battle_crowd_cheer_ver_2.ogg"></audio>
+
+<div class="app-container">
+    <div class="header">
+        <span class="bola-spin">⚽</span> FUTRADAR PRO
+    </div>
+
+    <div id="tab-noticias" class="section active">
+        <div class="section-title">📰 Giro de Mercado</div>
+        <div class="card" style="border-left: 4px solid white;">
+            <div style="color: #ccc; font-size: 12px; font-weight: bold;">REAL MADRID</div>
+            <div style="font-size: 18px; font-weight: 900; margin: 10px 0;">Federico Valverde crava do meio da rua e incendeia o Bernabéu!</div>
+            <div style="color: #aaa; font-size: 14px;">O uruguaio desferiu um foguete aos 88' para garantir a liderança absoluta na La Liga.</div>
+        </div>
+    </div>
+
+    <div id="tab-placares" class="section">
+        <div class="section-title">🏟️ Combates Ao Vivo</div>
+        <div class="card card-live">
+            <div class="status-live">🔴 AO VIVO - 82'</div>
+            <div class="match-row">
+                <div class="team">Corinthians</div>
+                <div class="score">3 - 1</div>
+                <div class="team">São Paulo</div>
+            </div>
+            <div style="text-align: center; margin-top: 15px; color: var(--verde-neon); font-size: 13px;">Gol: Yuri Alberto (2x), Garro</div>
+        </div>
+    </div>
+
+    <div id="tab-leidoex" class="section">
+        <div class="section-title">🚨 Tensão Extrema</div>
+        <div class="card card-ex">
+            <div class="ex-title">⚠️ LEI DO EX DETECTADA</div>
+            <div style="font-size: 16px; line-height: 1.5;">
+                <strong>Róger Guedes</strong> titular absoluto hoje contra seu ex-clube! <br><br>
+                <span style="color: var(--vermelho-alerta); font-weight: 900; font-size: 20px;">CHANCE DE GOL: 94%</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-copas" class="section section-copa" id="copas-container">
+        <h2 class="copa-title">🏆 GLÓRIA ETERNA</h2>
+        <div class="card card-copa">
+            <div style="color: var(--dourado); text-align: center; font-weight: bold; margin-bottom: 10px; letter-spacing: 2px;">FINAL - LIBERTADORES</div>
+            <div class="match-row">
+                <div class="team">Corinthians</div>
+                <div class="score score-copa">VS</div>
+                <div class="team">River Plate</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="trocarAba('noticias', this)">
+            <div class="nav-icon">📰</div><span>News</span>
+        </div>
+        <div class="nav-item" onclick="trocarAba('placares', this)">
+            <div class="nav-icon">🏟️</div><span>Jogos</span>
+        </div>
+        <div class="nav-item" onclick="trocarAba('leidoex', this)">
+            <div class="nav-icon">🚨</div><span>Lei do Ex</span>
+        </div>
+        <div class="nav-item" onclick="trocarAba('copas', this, true)">
+            <div class="nav-icon">🏆</div><span>Copas</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const clickSound = document.getElementById('sound-click');
+    const whistleSound = document.getElementById('sound-whistle');
+    const crowdSound = document.getElementById('sound-crowd');
+    let confettiInterval;
+
+    function trocarAba(abaId, elementoClicado, isCopa = false) {
+        // Toca som de clique padrão
+        clickSound.currentTime = 0;
+        clickSound.play();
+
+        // Limpa confetes se existirem
+        clearInterval(confettiInterval);
+        document.querySelectorAll('.confetti').forEach(e => e.remove());
+        crowdSound.pause();
+        crowdSound.currentTime = 0;
+
+        document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+        document.getElementById('tab-' + abaId).classList.add('active');
+
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        elementoClicado.classList.add('active');
+
+        // Efeitos Específicos por Aba
+        if (abaId === 'placares') {
+            whistleSound.currentTime = 0;
+            whistleSound.play();
+        }
+
+        if (isCopa) {
+            crowdSound.volume = 0.5;
+            crowdSound.play();
+            gerarConfetes();
+        }
+    }
+
+    function gerarConfetes() {
+        const copasSec = document.getElementById('tab-copas');
+        const colors = ['#ffd700', '#ffffff', '#c0c0c0', '#b8860b']; // Ouro, Prata e Branco
+
+        confettiInterval = setInterval(() => {
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.animationDuration = Math.random() * 2 + 2 + 's';
+            
+            // Randomiza o formato (quadrado ou tirinha)
+            if(Math.random() > 0.5) {
+                confetti.style.width = '8px';
+                confetti.style.height = '8px';
+                confetti.style.borderRadius = '50%';
+            }
+
+            copasSec.appendChild(confetti);
+
+            setTimeout(() => { confetti.remove(); }, 4000);
+        }, 100); // Cria um confete a cada 100ms
+    }
+</script>
+
+</body>
+</html>
